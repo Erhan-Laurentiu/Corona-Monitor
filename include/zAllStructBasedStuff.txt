@@ -1,0 +1,454 @@
+// struct iasiData
+// {
+
+//   const char *county_code;
+//   const char *county;
+//   int total_case;
+//   int total_healed;
+//   int total_dead;
+//   const char *referinta;
+//   int total_active;
+//   int new_case;
+// };
+
+// struct roData
+// {
+
+//   const char *day_case;
+//   int day_no;
+//   int new_case_no;
+//   long total_case;
+//   int new_healed_no;
+//   long total_healed;
+//   int new_dead_no;
+//   int total_dead;
+// };
+
+// struct coronaData
+// {
+//   struct iasiData iasi;
+//   struct roData romania;
+// };
+
+// coronaData getCoronaData()
+// {
+//  struct coronaData coronaDataToday = {getNewCasesIS1(),getNewCasesRo1()};
+//  return coronaDataToday; 
+//  }
+
+
+// iasiData getNewCasesIS1()
+// {
+//   HTTPClient http;
+
+//   Serial.print("[HTTP] begin...\n");
+
+//   // configure server and url
+//   http.begin(COUNTY_CASES_WEBSITE);
+
+//   Serial.print("[HTTP] GET...\n");
+
+//   // start connection and send HTTP header
+//   int httpCode = http.GET();
+
+//   if (httpCode > 0)
+//   {
+//     // HTTP header has been send and Server response header has been handled
+//     Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+//     // file found at server
+//     if (httpCode == HTTP_CODE_OK)
+//     {
+
+//       // get lenght of document (is -1 when Server sends no Content-Length header)
+//       int len = http.getSize();
+//       Serial.println(len);
+//       // create buffer for read
+//       uint8_t buff[200] = {0};
+//       uint8_t buff2 = 0;
+//       int i;
+//       // get tcp stream
+//       WiFiClient *stream = http.getStreamPtr();
+
+//       //        unsigned long start = micros();
+//       //        for (i = 0; i < len ; i++)
+//       stream->find("{\"county_code\":\"IS\"");
+//       char json[300] = "{\"county_code\":\"IS\"";
+//       char *p = &json[19];
+//       Serial.println(sizeof(json));
+//       Serial.println("A1");
+//       p += stream->readBytesUntil('}', p, 300 - 20);
+//       //      p++;
+//       *p = '}';
+
+//       http.end();
+//       Serial.print("[HTTP] connection closed or file end.\n");
+//       StaticJsonDocument<400> doc;
+//       deserializeJson(doc, json);
+//       struct iasiData iasi = {doc["county_code"], doc["county"], doc["total_case"], doc["total_healed"], doc["total_dead"], doc["referinta"], doc["total_active"], doc["new_case"]};
+//       Serial.println(iasi.new_case);
+//       return iasi;
+//     }
+//   }
+//   else
+//   {
+//     Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+//     //    *newCases = -1; //http fault;
+//   }
+// }
+
+// roData getNewCasesRo1()
+// {
+//   HTTPClient http;
+
+//   Serial.print("[HTTP] begin...\n");
+
+//   // configure server and url
+//   http.begin(ROMANIA_CASES_WEBSITE);
+
+//   Serial.print("[HTTP] GET...\n");
+
+//   // start connection and send HTTP header
+//   int httpCode = http.GET();
+
+//   if (httpCode > 0)
+//   {
+//     // HTTP header has been send and Server response header has been handled
+//     Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+//     // file found at server
+//     if (httpCode == HTTP_CODE_OK)
+//     {
+
+//       // get lenght of document (is -1 when Server sends no Content-Length header)
+//       int len = http.getSize();
+//       Serial.println(len);
+//       // create buffer for read
+//       uint8_t buff[200] = {0};
+//       uint8_t buff2 = 0;
+//       int i;
+//       // get tcp stream
+//       WiFiClient *stream = http.getStreamPtr();
+
+//       unsigned long start = micros();
+//       for (i = 0; i < len - 200; i++)
+//         stream->readBytes(&buff2, 1);
+//       unsigned long end = micros();
+//       unsigned long delta = end - start;
+//       Serial.println(delta);
+//       Serial.println(i);
+//       stream->readBytes(buff, 200);
+//       http.end();
+//       Serial.print("[HTTP] connection closed or file end.\n");
+
+//       for (i = 0; i < 200; i++)
+//         Serial.print((char)buff[i]);
+//       buff[199] = 0;
+//       buff[198] = 0;
+//       buff[197] = 0;
+//       for (i = 199; i > 0; i--)
+//       {
+//         if (buff[i] == '{')
+//           break;
+//       }
+
+//       uint8_t *p = &buff[i];
+//       StaticJsonDocument<200> doc;
+//       deserializeJson(doc, p);
+//       struct roData romania={doc["day_case"],doc["day_no"],doc["new_case_no"],doc["total_case"],doc["new_healed_no"],doc["total_healed"],doc["new_dead_no"],doc["total_dead"]};
+//       Serial.println();
+//       Serial.println(romania.new_case_no);
+//       return romania;
+//     }
+//   }
+//   else
+//   {
+//     Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+//   }
+// }
+
+// int getNewCasesRo2()
+// { //Citeste tot stringu
+//   HTTPClient http;
+
+//   Serial.print("[HTTP] begin...\n");
+
+//   // configure server and url
+//   http.begin("https://covid19.geo-spatial.org/api/dashboard/getDailyCaseReport");
+//   //http.begin("192.168.1.12", 80, "/test.html");
+
+//   Serial.print("[HTTP] GET...\n");
+//   // start connection and send HTTP header
+//   int httpCode = http.GET();
+//   if (httpCode > 0)
+//   {
+//     // HTTP header has been send and Server response header has been handled
+//     Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+//     // file found at server
+//     if (httpCode == HTTP_CODE_OK)
+//     {
+
+//       // get lenght of document (is -1 when Server sends no Content-Length header)
+//       int len = http.getSize();
+//       Serial.println(len);
+//       // create buffer for read
+//       uint8_t buff[316] = {0};
+//       uint8_t buff2 = 0;
+//       int i;
+//       // get tcp stream
+//       WiFiClient *stream = http.getStreamPtr();
+//       //                stream+=len-3;
+//       unsigned long start = micros();
+//       for (i = 0; i < len - 316; i++)
+//         stream->readBytes(&buff2, 1);
+//       unsigned long end = micros();
+//       unsigned long delta = end - start;
+//       Serial.println(delta);
+//       Serial.println(i);
+//       stream->readBytes(buff, 316);
+//       http.end();
+
+//       for (i = 0; i < 316; i++)
+//         Serial.print((char)buff[i]);
+//       for (i = 315; i > 0; i--)
+//       {
+//         if (buff[i] == '{')
+//           break;
+//       }
+//       buff[315] = 0;
+//       buff[314] = 0;
+//       buff[313] = 0;
+//       uint8_t *p = &buff[i];
+//       StaticJsonDocument<316> doc;
+//       deserializeJson(doc, p);
+
+//       const char *day_case = doc["day_case"];   // "2020-10-27"
+//       int day_no = doc["day_no"];               // 245
+//       int new_case_no = doc["new_case_no"];     // 4724
+//       long total_case = doc["total_case"];      // 217216
+//       int new_healed_no = doc["new_healed_no"]; // 3819
+//       long total_healed = doc["total_healed"];  // 155630
+//       int new_dead_no = doc["new_dead_no"];     // 104
+//       int total_dead = doc["total_dead"];       // 6574
+//       Serial.println();
+//       Serial.println(total_case);
+//       Serial.println(i);
+
+//       // read all data from server
+//       //                while(http.connected() && (len > 0 || len == -1)) {
+//       //                    // get available data size
+//       //                    size_t size = stream->available();
+//       //
+//       //                    if(size) {
+//       //                        // read up to 128 byte
+//       //                        int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+//       //
+//       //                        // write it to Serial
+//       //                        Serial.write(buff, c);
+//       //                        Serial.println(ESP.getFreeHeap());
+//       //                        if(len > 0) {
+//       //                            len -= c;
+//       //                        }
+//       //                    }
+//       //                    delay(1);
+//       //                }
+
+//       Serial.println();
+//       Serial.print("[HTTP] connection closed or file end.\n");
+//     }
+//   }
+//   else
+//   {
+//     Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+//   }
+// }
+
+
+
+
+// coronaData getCoronaData();
+
+
+// iasiData getNewCasesIS1();
+
+// roData getNewCasesRo1();
+
+
+// int getNewCasesRo2();
+
+
+
+
+
+
+
+
+
+// void drawArrows(int countyArrow, int countryArrow)
+// {
+//   if (countyArrow==UP) display.drawExampleBitmap(arrowUp, 229, DISPLAY_MAX_HEIGHT / 4 - 15, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+//   else if(countyArrow==DOWN)   display.drawExampleBitmap(arrowDown, 229, DISPLAY_MAX_HEIGHT / 4 - 15, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+//   else display.drawExampleBitmap(noArrow, 229, 3 * DISPLAY_MAX_HEIGHT / 4 - 11, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+  
+//   if (countryArrow==UP)   display.drawExampleBitmap(arrowUp, 229, 3 * DISPLAY_MAX_HEIGHT / 4 - 11, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+//   else if(countryArrow==DOWN)  display.drawExampleBitmap(arrowDown, 229, 3 * DISPLAY_MAX_HEIGHT / 4 - 11, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+//   else display.drawExampleBitmap(noArrow, 229,  DISPLAY_MAX_HEIGHT / 4 - 15, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
+//   display.update();
+
+
+// }
+
+
+
+// void updateDisplay(String date, int newCasesIS , int newCasesRO)
+// {
+//   //  display.setFont(&BIGGER_FONT);
+//   //  displayTextNew(String(newCasesIS),CORONA_IMG_WIDTH + 7+4*18, DISPLAY_MAX_HEIGHT / 4 + 6);
+//   //  displayTextNew(String(newCasesRO),CORONA_IMG_WIDTH + 7+4*18, 3*DISPLAY_MAX_HEIGHT / 4 + 10);
+//   //  display.update();
+//   Serial.println("updateDisplay1");
+//   display.setFont(&BIGGER_FONT);
+//   displayTextNew(String(newCasesIS), 127, display.height() / 4 + 6);      //IS
+//   Serial.println("updateDisplay2");
+//   displayTextNew(String(newCasesRO), 120, 3 * display.height() / 4 + 10); //RO
+//   Serial.println("updateDisplay3");
+//   String dateString;
+//   dateString += date[8];
+//   dateString += date[9];
+//   dateString += '.';
+//   dateString += date[5];
+//   dateString += date[6];
+//   dateString += '.';
+//   dateString += date[0];
+//   dateString += date[1];
+//   dateString += date[2];
+//   dateString += date[3];
+//   Serial.println(dateString);
+//   //  date[8]+date[9]+"."+date[5]+date[6]+"."+date[0]+date[1]+date[2]+date[3];
+//   display.setFont(&SMALLER_FONT);
+//   displayTextNew("Updated:", 5, 110);
+//   //  displayTextNew("23:25", 10, 110);
+//   displayTextNew(dateString, 0, 120);
+//   Serial.println("updateDisplay4");
+// //  display.update();
+// }
+
+
+// void displayTextNew(const String &str, int16_t x, int16_t y)
+// {
+//   //    int16_t x = 0;
+//   int16_t x1, y1;
+//   uint16_t w, h;
+//   display.setCursor(x, y);
+//   display.getTextBounds(str, x, y, &x1, &y1, &w, &h);
+//   display.println(str);
+// }
+
+// //void showPartialUpdateIasi()
+// //{
+// //  Serial.println("Updating display ...");
+// //
+// //  uint16_t box_x = 57;
+// //  uint16_t box_y = 0;
+// //  uint16_t box_w = 193;
+// //  uint16_t box_h = 100;
+// //  uint16_t cursor_y = box_y + 16;
+// //
+// //  display.setFont(&BIGGER_FONT);
+// //  display.setTextColor(GxEPD_BLACK);
+// //
+// ////  display.fillRect(box_x, box_y, box_w, box_h, GxEPD_BLACK);
+// //
+// //  display.fillRect(box_x, box_y, box_w, box_h, GxEPD_WHITE);
+// //  delay(100);
+// //  display.setCursor(box_x, cursor_y+38);
+// //  display.print("9876");
+// //  display.updateWindow(box_x, box_y, box_w, box_h, true);
+// //}
+// void displayInit()
+// {
+//   display.init();
+//   display.setRotation(1);
+//   display.eraseDisplay();
+//   display.setTextColor(GxEPD_BLACK);
+//   display.setFont(&BIGGER_FONT);
+//   display.setTextSize(0);
+// }
+
+// void layoutInit()
+// {
+//   uint16_t x = 0;
+//   uint16_t y = (DISPLAY_MAX_HEIGHT - CORONA_IMG_WIDTH) / 2;
+
+//   display.fillScreen(GxEPD_WHITE);
+
+//   //draw corona logo
+//   display.drawExampleBitmap(corona, x, y, CORONA_IMG_WIDTH, CORONA_IMG_HEIGHT, GxEPD_BLACK);
+
+
+//   //Vertical Line
+//   display.drawLine(CORONA_IMG_WIDTH + 3, DISPLAY_MIN_HEIGHT, CORONA_IMG_WIDTH + 3, DISPLAY_MAX_HEIGHT, GxEPD_BLACK);
+//   display.drawLine(CORONA_IMG_WIDTH + 4, DISPLAY_MIN_HEIGHT, CORONA_IMG_WIDTH + 4, DISPLAY_MAX_HEIGHT, GxEPD_BLACK);
+//   display.drawLine(CORONA_IMG_WIDTH + 5, DISPLAY_MIN_HEIGHT, CORONA_IMG_WIDTH + 5, DISPLAY_MAX_HEIGHT, GxEPD_BLACK);
+
+//   //Horizontal line
+//   display.drawLine(CORONA_IMG_WIDTH + 5, DISPLAY_MAX_HEIGHT / 2 - 1, DISPLAY_MAX_WIDTH, DISPLAY_MAX_HEIGHT / 2 - 1, GxEPD_BLACK);
+//   display.drawLine(CORONA_IMG_WIDTH + 5, DISPLAY_MAX_HEIGHT / 2, DISPLAY_MAX_WIDTH, DISPLAY_MAX_HEIGHT / 2, GxEPD_BLACK);
+//   display.drawLine(CORONA_IMG_WIDTH + 5, DISPLAY_MAX_HEIGHT / 2 + 1, DISPLAY_MAX_WIDTH, DISPLAY_MAX_HEIGHT / 2 + 1, GxEPD_BLACK);
+
+//   display.setFont(&BIGGER_FONT);
+//   displayTextNew("IS: ", CORONA_IMG_WIDTH + 7, DISPLAY_MAX_HEIGHT / 4 + 6);
+//   displayTextNew("RO:", CORONA_IMG_WIDTH + 7, 3 * display.height() / 4 + 10);
+//   //
+//   //     display.setFont(&MASSIVE_FONT);
+//   //     displayTextNew(casesIs , 127 , display.height() / 4 + 6 ); //IS
+//   //     displayTextNew(casesRo , 120 , 3 * display.height() / 4 + 10 ); //RO
+
+// //  display.update();
+// //  delay(500);
+// }
+
+// void updateDisplayData()
+// {
+//   display.setFont(&BIGGER_FONT);
+//   displayTextNew(casesIs, 127, display.height() / 4 + 6);      //IS
+//   displayTextNew(casesRo, 120, 3 * display.height() / 4 + 10); //RO
+
+//   display.setFont(&SMALLER_FONT);
+//   displayTextNew("Updated:", 5, 100);
+//   displayTextNew("23:25", 10, 110);
+//   displayTextNew("15.02.2020", 0, 120);
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
