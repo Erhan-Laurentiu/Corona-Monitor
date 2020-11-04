@@ -1,3 +1,4 @@
+#include"Arduino.h"
 #ifndef EPAPER_H_
 #define EPAPER_H_
 
@@ -21,13 +22,12 @@ class E_PAPER
 {
 private:
     void displayTextNew(const String &str, int16_t x, int16_t y);
-    void updateDisplayData();
 
 public:
     E_PAPER();
     void displayInit();
     void layoutInit();
-    void updateDisplay(String lastUpdateDate, int newCasesIS, int newCasesRO);
+    void updateDisplayData(String lastUpdateDate, int newCasesIS, int newCasesRO);
     void drawArrows(int countyArrow, int countryArrow);
 };
 

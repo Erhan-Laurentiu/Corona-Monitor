@@ -10,8 +10,12 @@
 #include "Credentials.h"
 #include <Arduino.h>
 
-int getArrowDirection(int oldCasesCounty,int newCasesCountry);
-void checkIfTheDataIsDifferent(String oldData , String newData);
+#define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
+// #define TIME_TO_SLEEP  5        /* Time ESP32 will go to sleep (in seconds) */
+
+int getArrowDirection(int oldCasesCounty, int newCasesCountry);
+void checkIfTheDataIsDifferent(String oldData, String newData);
+void goToSleep(int minutes);
 
 void setup()
 {
@@ -39,8 +43,8 @@ void setup()
   WiFi.mode(WIFI_OFF);
   btStop();
 
-  checkIfTheDataIsDifferent(coronaDataYesterday.dateOfData,coronaDataToday.dateOfData);
- 
+  checkIfTheDataIsDifferent(coronaDataYesterday.dateOfData, coronaDataToday.dateOfData);
+
   coronaDataToday.printCoronaData("New data: ");
 
   E_PAPER ePaper;
@@ -48,16 +52,16 @@ void setup()
   ePaper.displayInit();
   ePaper.layoutInit();
   Serial.println("Before updateDisplay");
-  ePaper.updateDisplay(coronaDataToday.dateOfData, coronaDataToday.newCasesCounty, coronaDataToday.newCasesCountry);
-  arrow1 = getArrowDirection(coronaDataToday.newCasesCounty,coronaDataYesterday.newCasesCounty);
-  arrow2 = getArrowDirection(coronaDataToday.newCasesCountry,coronaDataYesterday.newCasesCountry);
+  ePaper.updateDisplayData(coronaDataToday.dateOfData, coronaDataToday.newCasesCounty, coronaDataToday.newCasesCountry);
+  arrow1 = getArrowDirection(coronaDataToday.newCasesCounty, coronaDataYesterday.newCasesCounty);
+  arrow2 = getArrowDirection(coronaDataToday.newCasesCountry, coronaDataYesterday.newCasesCountry);
   ePaper.drawArrows(arrow1, arrow2);
 
   coronaDataToday.writeInEEPROM();
 
   Serial.println("Enter deep sleep");
+  goToSleep(22 * 60); // until i get an rtc this will do 
 
-  esp_deep_sleep_start();
 
   Serial.println("This will never be printed");
 }
@@ -66,7 +70,7 @@ void loop()
 {
 }
 
-int getArrowDirection(int oldCasesCounty,int newCasesCountry)
+int getArrowDirection(int oldCasesCounty, int newCasesCountry)
 {
   if (oldCasesCounty > newCasesCountry)
     return UP;
@@ -76,14 +80,27 @@ int getArrowDirection(int oldCasesCounty,int newCasesCountry)
     return NONE;
 }
 
-void checkIfTheDataIsDifferent(String oldData , String newData)
+void checkIfTheDataIsDifferent(String oldData, String newData)
 {
   //if the date is the same go to sleep
   if (oldData == newData)
   {
     Serial.println("There is no new data to be displayed");
+    goToSleep(5);
+    Serial.println("There is no new data to be displayed");
     Serial.println("Enter deep sleep");
     esp_deep_sleep_start();
     Serial.println("This will never be printed");
   }
+}
+
+void goToSleep(int minutes)
+{
+  long seconds = minutes * 60;
+  esp_sleep_enable_timer_wakeup(seconds *uS_TO_S_FACTOR);
+  Serial.println("Setup ESP32 to sleep for every " + String(seconds) +
+                 " Seconds");
+  Serial.println("Going to sleep now");
+  esp_deep_sleep_start();
+  Serial.println("This will never be printed");
 }

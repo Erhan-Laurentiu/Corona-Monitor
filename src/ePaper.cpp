@@ -9,8 +9,7 @@
 #include"image.h"
 #include"Fonts.h"
 
-String casesIs = "9876";
-String casesRo = "09876";
+
 GxIO_Class io(SPI, ELINK_SS, ELINK_DC, ELINK_RESET);
 GxEPD_Class display(io, ELINK_RESET, ELINK_BUSY);
 
@@ -33,13 +32,14 @@ void E_PAPER::drawArrows(int countyArrow, int countryArrow)
   else if(countryArrow==DOWN)  display.drawExampleBitmap(arrowDown, 229, 3 * DISPLAY_MAX_HEIGHT / 4 - 11, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
   else display.drawExampleBitmap(noArrow, 229,  DISPLAY_MAX_HEIGHT / 4 - 15, ARROW_IMG_WIDTH, ARROW_IMG_HEIGHT, GxEPD_BLACK);
   display.update();
+  delay(2000);
 
 
 }
 
 
 
-void E_PAPER::updateDisplay(String date, int newCasesIS , int newCasesRO)
+void E_PAPER::updateDisplayData(String date, int newCasesIS , int newCasesRO)
 {
 
   Serial.println("updateDisplay1");
@@ -106,7 +106,7 @@ void E_PAPER::displayTextNew(const String &str, int16_t x, int16_t y)
 void E_PAPER::displayInit()
 {
   display.init();
-  display.setRotation(1);
+  display.setRotation(3);
   display.eraseDisplay();
   display.setTextColor(GxEPD_BLACK);
   display.setFont(&BIGGER_FONT);
@@ -146,15 +146,15 @@ void E_PAPER::layoutInit()
 //  delay(500);
 }
 
-void E_PAPER::updateDisplayData()
-{
-  display.setFont(&BIGGER_FONT);
-  displayTextNew(casesIs, 127, display.height() / 4 + 6);      //IS
-  displayTextNew(casesRo, 120, 3 * display.height() / 4 + 10); //RO
+// void E_PAPER::updateDisplayData()
+// {
+//   display.setFont(&BIGGER_FONT);
+//   displayTextNew(casesIs, 127, display.height() / 4 + 6);      //IS
+//   displayTextNew(casesRo, 120, 3 * display.height() / 4 + 10); //RO
 
-  display.setFont(&SMALLER_FONT);
-  displayTextNew("Updated:", 5, 100);
-  displayTextNew("23:25", 10, 110);
-  displayTextNew("15.02.2020", 0, 120);
-}
+//   display.setFont(&SMALLER_FONT);
+//   displayTextNew("Updated:", 5, 100);
+//   displayTextNew("23:25", 10, 110);
+//   displayTextNew("15.02.2020", 0, 120);
+// }
 
